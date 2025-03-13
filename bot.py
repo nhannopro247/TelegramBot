@@ -1,19 +1,39 @@
 import os
+import threading
 import requests
 import random
 import string
-import asyncio
-from dotenv import load_dotenv
+import logging
+from flask import Flask
 from telegram import Update, BotCommand
 from telegram.ext import Application, CommandHandler, CallbackContext
 
-# Tải biến môi trường từ file .env
-load_dotenv()
+# Cấu hình logging để ghi lỗi (nếu có)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+
+# Load biến môi trường
 TOKEN = os.getenv("BOT_TOKEN")
 MAILTM_API = "https://api.mail.tm"
+PORT = os.getenv("PORT", 5000)  # Render yêu cầu mở cổng
 
 # Headers tránh lỗi 403
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+# **Tạo Flask server giả để Render không tắt bot**
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot Telegram đang chạy!"
+
+# **Chạy Flask server trên một luồng riêng**
+def run_flask():
+    app.run(host="0.0.0.0", port=int(PORT))
+
+threading.Thread(target=run_flask, daemon=True).start()
 
 # **Danh sách lệnh menu Telegram**
 COMMANDS = [
@@ -106,10 +126,10 @@ async def inbox(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text("⚠ Lỗi khi lấy nội dung email!")
 
 # **Khởi động bot**
-app = Application.builder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("getmail", getmail))
-app.add_handler(CommandHandler("inbox", inbox))
+app_bot = Application.builder().token(TOKEN).build()
+app_bot.add_handler(CommandHandler("start", start))
+app_bot.add_handler(CommandHandler("getmail", getmail))
+app_bot.add_handler(CommandHandler("inbox", inbox))
 
-print("✅ Bot đang chạy...")
-app.run_polling()
+print("✅ Bot đang chạy trên Render...")
+app_bot.run_polling()

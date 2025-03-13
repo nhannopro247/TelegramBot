@@ -19,7 +19,7 @@ logging.basicConfig(
 TOKEN = os.getenv("BOT_TOKEN")
 MAILTM_API = "https://api.mail.tm"
 PORT = os.getenv("PORT", 5000)  # Render yêu cầu mở cổng
-RENDER_URL = os.getenv("RENDER_URL", "https://telegram-bot-xyz.onrender.com")
+RENDER_URL = os.getenv("RENDER_URL", "https://telegrambot-3t7l.onrender.com")
 
 # Headers tránh lỗi 403
 HEADERS = {"User-Agent": "Mozilla/5.0"}
